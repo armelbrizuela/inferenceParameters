@@ -1,0 +1,57 @@
+---
+title: "Práctica de Inferencia estadística"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+#| eval: false
+install.packages("readxl")
+install.packages("dplyr")
+```
+
+Con la función `library()`, active los paquetes **readxl** y **dplyr**.
+
+```{r}
+
+```
+
+Pasqualotto, Altarelli, de Angeli, Menestrina, Bavelier y Venuti (2022) plantean lo siguiente en el *abstract*:
+
+\[...\] desarrollamos una intervención cognitiva basada en videojuegos destinada a mejorar varias facetas de las funciones ejecutivas. Este juego está compuesto por minijuegos que aplican versiones *gamificadas* de ejercicios clínicos estándar \[...\] En un estudio que involucró a 151 niños que leen normalmente demostramos que después de esta intervención \[...\] de dominio general, las habilidades de lectura, así como las habilidades de atención y planificación, mejoraron significativamente. Nuestros resultados muestran que entrenar el control atencional puede traducirse en una mejor eficiencia de lectura, la cual se mantiene en una prueba de seguimiento 6 meses después.
+
+Lea el archivo de datos **reading.xlsx** con la función `read_excel()` y guarde los datos en un objeto denominado `reading`.
+
+```{r}
+
+```
+
+Con la función `glimpse()` verifique que, excepto las columnas `ID` y `group`, todas las columnas sean númericas, específicamente de tipo `dbl` (`double`).
+
+```{r}
+
+```
+
+En el repositorio de donde se descargaron los datos, el archivo *variables.pdf* indica lo que representa cada columna.
+
+![](variableseading.png)
+
+Veamos algunos estadísticos descriptivos.
+
+```{r}
+
+```
+
+Ahora veamos algunos gráficos.
+
+```{r}
+
+```
+
+# Referencia
+
+Pasqualotto, A., Altarelli, I., De Angeli, A., Menestrina, Z., Bavelier, D., & Venuti, P. (2022). Enhancing reading skills through a video game mixing action mechanics and cognitive training. *Nature human behaviour*, 6(4), 545-554.

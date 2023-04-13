@@ -1,0 +1,146 @@
+---
+title: "Inferencia estadística"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+editor_options: 
+  chunk_output_type: inline
+---
+
+Más adelante se mostrarán valores muy pequeños, por lo que conviene configurar a R para que no utilice notación científica.
+
+```{r}
+options(scipen = 999)
+```
+
+```{r}
+#| eval: false
+install.packages("readr")
+install.packages("dplyr")
+install.packages("tidyr")
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+egresados <- read_delim("BASE_EGRESADOS.csv", delim = ";")
+```
+
+```{r}
+glimpse(egresados)
+```
+
+```{r}
+summary(egresados$P44)
+```
+
+```{r}
+egresados$P44 <- as.numeric(egresados$P44)
+egresados$P44 <- na_if(egresados$P44, 99)
+egresados <- drop_na(egresados, P44)
+```
+
+Vamos a trabajar con graduados cuyo título máximo sea bachillerato o licenciatura.
+
+```{r}
+egresados <- filter(egresados, F_3 %in% c("1", "2"))
+```
+
+![](salariosRangos.png)
+
+```{r}
+hist(egresados$P44, main="", ylab="", xlab = "")
+axis(side = 1, at = seq(1, 10, 1), labels = seq(1, 10, 1))
+abline(v = mean(egresados$P44), col="blue", lwd=2)
+```
+
+¿La media observada de salarios es congruente con el salario mínimo para personas con bachillerato o licenciatura?
+
+![](salariosMTSS.png)
+
+Vamos a utilizar como valor de referencia un salario mínimo promedio entre 518566.20 para bachilleres y 622300.77 para licenciados. Por lo tanto, $B_0 = 570434 = 3$. El 3 corresponde al código que se le hubiera asignado a un salario de 570434 colones en este estudio.
+
+Nótese que la media observada en esta muestra es diferente a lo que se establece como mínimo.
+
+Sin embargo, sabemos que si hacemos este mismo cálculo con otras muestras de graduados, la media de salarios no necesariamente será igual a 4.
+
+Lo que quisiéramos es generalizar, es decir, hacer la **inferencia estadística** de que el promedio de salario para bachilleres y licenciados es diferente de 3.
+
+En este escenario, nuestros modelos C(ompacto) y A(umentado) son los siguientes:
+
+$$
+\text{MODELO C: } Y_i = 3 + \varepsilon_i
+$$
+
+$$
+\text{MODELO A: } Y_i = \beta_0 + \varepsilon_i
+$$
+
+Ahora vamos a calcular los SSE (*Sum of Squared Errors*) de los modelos: `SSE_C` y `SSE_A`.
+
+```{r}
+SSE_C <- sum((egresados$P44 - 3)^2)
+SSE_A <- sum((egresados$P44 - mean(egresados$P44))^2)
+```
+
+Tal y como se ha visto en clases anteriores, el modelo A genera menos error que el modelo C. Esto se ve más claramente cuando calculamos el PRE (*Proportional Reduction Error*).
+
+```{r}
+PRE <- (SSE_C - SSE_A)/SSE_C
+```
+
+Al utilizar el modelo A, logramos reducir el error en un 24%.
+
+Sin embargo, el modelo A al ser más complejo (tiene un parámetro adicional) necesariamente reduce el error. De hecho, si incluyéramos más parámetros en el modelo A, aún cuando no tengan ninguna relación con el salario, también veríamos que el error del modelo A sería menor que el del C.
+
+Es necesario introducir una modificación al PRE para que tome en cuenta la cantidad de parámetros que agrega el modelo A con respecto (1) al modelo C y (2) a la cantidad máxima de parámetros.
+
+$$
+F = \frac{\frac{PRE}{PA-PC}}{\frac{1-PRE}{n-PA}}
+$$
+
+En esta fórmula para convertir el PRE en el **estadístico de prueba** $F$, $PA$ se refiere a la cantidad de parámetros del modelo A, $PC$ representa la cantidad de parámetros del modelo C y $n$ indica el tamaño de la muestra.
+
+```{r}
+PA <- 1  # media observada de salarios
+PC <- 0  # valor obtenido de tabla de salarios mínimos
+n <- 279 # egresados
+
+Fstatistic <- (PRE/(PA - PC))/((1 - PRE)/(n - PA))
+```
+
+Si el modelo A es mejor que el modelo C, `Fstatistic` deberá ser un número mayor a 1. Si `Fstatistic` estuviera cercano a 1, entonces el error del modelo C sería muy similar al del modelo A, tomando en cuenta la cantidad extra de parámetros del modelo A.
+
+El valor de $F$ depende en parte del valor de PRE y a su vez el valor de PRE depende en parte de la media de los datos. Dado que los datos son solo una de infinitas muestras diferentes, tanto PRE como $F$ van a ser diferentes en cada muestreo.
+
+En este punto necesitamos conocer la **distribución muestral** de $F$, es decir, cuáles serían los valores de $F$ en otras muestras. Si asumimos que los errores que componen `SSE_C` y `SSE_A` son **normales**, **independientes**, **distribuidos idénticamente** y **no sesgados**, la distribución muestral de $F$ sigue una distribución $F$.
+
+```{r}
+curve(df(x, PA - PC, n - PA), from=0, to=6)
+```
+
+En una distribución $F$, `PA - PC` y `n - PA` se denominan **grados de libertad** y existe una distribución $F$ diferente para distintos grados de libertad. En una distribución $F$ con grados de libertad $PA - PC=1$ y $n - PA=278$, lo más probable es observar valores iguales o inferiores a 3.875126.
+
+```{r}
+pf(3.875126, PA - PC, n-PA)
+```
+
+Esto implica que es muy probable observar valores de $F$ cercanos a aproximadamente 4. Si nuestro `Fstatistic` no supera este umbral de 3.875126, entonces no podemos rechazar la hipótesis (nula) de que el modelo A en futuros muestreos generará errores muy similares al modelo C.
+
+```{r}
+curve(df(x, PA - PC, n - PA), from=0, to=90)
+abline(v = Fstatistic, col="red", lwd=4)
+```
+
+En el gráfico de la distribución muestral de $F$ se aprecia que es prácticamente imposible observar valores iguales o mayores que `Fstatistic`. De hecho, es posible calcular la probabilidad de observar un valor tan extremo como `Fstatistic` o superior.
+
+```{r}
+pf(Fstatistic, PA - PC, n-PA, lower.tail = FALSE)
+```
+
+Dado que la probabilidad de observar un valor de $F$ tan grande como `Fstatistic` es menor a 0.05, rechazamos la hipótesis (nula) de que el modelo A genere errores o residuos similares al modelo C. Esto equivale a rechazar el modelo C.
