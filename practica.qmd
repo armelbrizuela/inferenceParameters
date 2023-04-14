@@ -8,26 +8,30 @@ editor_options:
   chunk_output_type: inline
 ---
 
-```{r}
-#| eval: false
-install.packages("readxl")
-install.packages("dplyr")
-```
-
-Con la función `library()`, active los paquetes **readxl** y **dplyr**.
-
-```{r}
-
-```
-
 Pasqualotto, Altarelli, de Angeli, Menestrina, Bavelier y Venuti (2022) plantean lo siguiente en el *abstract*:
 
-\[...\] desarrollamos una intervención cognitiva basada en videojuegos destinada a mejorar varias facetas de las funciones ejecutivas. Este juego está compuesto por minijuegos que aplican versiones *gamificadas* de ejercicios clínicos estándar \[...\] En un estudio que involucró a 151 niños que leen normalmente demostramos que después de esta intervención \[...\] de dominio general, las habilidades de lectura, así como las habilidades de atención y planificación, mejoraron significativamente. Nuestros resultados muestran que entrenar el control atencional puede traducirse en una mejor eficiencia de lectura, la cual se mantiene en una prueba de seguimiento 6 meses después.
+\[...\] desarrollamos una intervención cognitiva basada en videojuegos destinada a mejorar varias facetas de las funciones ejecutivas. Este juego está compuesto por minijuegos que aplican versiones *gamificadas* de ejercicios clínicos estándar \[...\] En un estudio que involucró a 151 niños que leen normalmente, demostramos que después de esta intervención \[...\] de dominio general, las habilidades de lectura, así como las habilidades de atención y planificación, mejoraron significativamente. Nuestros resultados muestran que entrenar el control atencional puede traducirse en una lectura más eficiente, la cual se mantiene en una prueba de seguimiento 6 meses después.
 
-Lea el archivo de datos **reading.xlsx** con la función `read_excel()` y guarde los datos en un objeto denominado `reading`.
+Estos paquetes deben estar instalados.
+
+```{r}
+#| eval: false
+install.packages("stringr")
+install.packages("readxl")
+install.packages("dplyr")
+install.packages("tidyr")
+```
+
+Con la función `library()`, active los paquetes **stringr**, **readxl**, **dplyr** y **tidyr**.
 
 ```{r}
 
+```
+
+Lea el archivo de datos **reading.xlsx** con la función `read_excel()` y guarde los datos en un objeto denominado `reading`. Del archivo de Excel, solamente lea la hoja **1. reading skills**.
+
+```{r}
+reading <- read_excel("reading.xlsx", sheet = "1. reading skills")
 ```
 
 Con la función `glimpse()` verifique que, excepto las columnas `ID` y `group`, todas las columnas sean númericas, específicamente de tipo `dbl` (`double`).
@@ -36,9 +40,99 @@ Con la función `glimpse()` verifique que, excepto las columnas `ID` y `group`, 
 
 ```
 
-En el repositorio de donde se descargaron los datos, el archivo *variables.pdf* indica lo que representa cada columna.
+La columna `group` es de tipo `character` y `sex` es de tipo `double`. Modifique ambas para que sean de tipo `factor`.
 
-![](variableseading.png)
+```{r}
+reading$sex <- as.factor()
+reading$group <- as.factor()
+```
+
+Elimine el símbolo "-" de los valores contenidos en la columna `time`. Para
+
+```{r}
+reading$time <- str_remove( , )
+```
+
+Es necesario reorganizar los datos para todas las observaciones de una misma persona participante aparezcan en una misma fila.
+
+```{r}
+reading <- pivot_wider(reading, names_from = time, values_from = w_speed:text_accuracy)
+```
+
+Muestre la media, el valor mínimo y el valor máximo de las variables numéricas (`double`). También muestre cuántos valores `NA` hay en cada columna. Para ello, utilice la función `describirNumericas()`.
+
+```{r}
+describirNumericas <- function(datos) {
+  df <- select(reading, where(is.numeric))
+  result <- tibble(
+    missing = apply(df, 2, function(x) sum(is.na(x))),
+    min = apply(df, 2, min, na.rm = TRUE),
+    mean = apply(df, 2, mean, na.rm = TRUE),
+    max = apply(df, 2, max, na.rm = TRUE))
+  result
+}
+```
+
+```{r}
+
+```
+
+Muestre una tabla de frecuencias de las variables `factor`. También muestre cuántos valores `NA` hay en cada columna. Para ello, utilice la función `describirNoNumericas()`.
+
+```{r}
+describirNoNumericas <- function(datos) {
+  df <- select(reading, !where(is.numeric))
+  apply(df, 2, \(x) data.frame(table(x, useNA = "always")))
+}
+```
+
+```{r}
+
+```
+
+Con la función `lm()` estime un modelo C(ompacto) con los predictores `age`, `sex`, `IQ` y `w_accuracy_pretest` y un modelo A(umentado) con los mismos predictores más `group`. En ambos modelos, la variable de respuesta debe ser `w_accuracy_posttest`. Recuerde incluir el intercepto (1) en ambos modelos al inicio de la fórmula dentro de `lm()`.
+
+```{r}
+
+```
+
+Calcule el valor de PRE y de la $F$.
+
+$$
+\text{PRE} = \frac{\text{ERROR(C)} - \text{ERROR(A)}}{\text{ERROR(C)}} = 1 - \frac{\text{ERROR(A)}}{\text{ERROR(C)}}
+$$
+
+$$
+F = \frac{\frac{\text{PRE}}{\text{PA}-\text{PC}}}{\frac{1-\text{PRE}}{n-\text{PA}}}
+$$
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+Si el modelo A es significativamente mejor que el modelo C, entonces el valor de $F$ debe ser estadísticamente significativo. Si esto ocurre, podríamos concluir que la variable `group` reduce los residuos de manera significativa.
+
+Con la función `pf()`, calcule la probabilidad de observar un valor igual o más grande que `Fstatistic`.
+
+```{r}
+
+```
+
+La función `anova()` permite obtener de una forma más simple tanto el valor de la $F$ como el de la probabilidad asociada a la prueba estadística.
+
+```{r}
+anova(modeloC, modeloA)
+```
+
+Grafique los residuos del modelo A para determinar si son (aproximadamente) normales.
+
+```{r}
+
+```
 
 # Referencia
 

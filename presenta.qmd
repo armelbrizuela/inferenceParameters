@@ -107,8 +107,8 @@ $$
 En esta fórmula para convertir el PRE en el **estadístico de prueba** $F$, $PA$ se refiere a la cantidad de parámetros del modelo A, $PC$ representa la cantidad de parámetros del modelo C y $n$ indica el tamaño de la muestra.
 
 ```{r}
-PA <- 1  # cantidad de parámetros del modelo Aumentado
-PC <- 0  # cantidad de parámetros del modelo compacto
+PA <- 1  # cantidad de parámetros del modelo A(umentado)
+PC <- 0  # cantidad de parámetros del modelo C(ompacto)
 n <- 279 # cantidad de participantes
 
 Fstatistic <- (PRE/(PA - PC))/((1 - PRE)/(n - PA))
