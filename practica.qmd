@@ -1,5 +1,5 @@
 ---
-title: "Práctica de Inferencia estadística"
+title: "Práctica de Inferencia sobre valores de parámetros"
 format: 
   html:
     embed-resources: true

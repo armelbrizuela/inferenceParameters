@@ -1,5 +1,5 @@
 ---
-title: "Inferencia estadística"
+title: "Inferencia sobre valores de parámetros"
 format: 
   html:
     embed-resources: true
