@@ -101,15 +101,15 @@ Sin embargo, el modelo A al ser más complejo (tiene un parámetro adicional) ne
 Es necesario introducir una modificación al PRE para que tome en cuenta la cantidad de parámetros que agrega el modelo A con respecto (1) al modelo C y (2) a la cantidad máxima de parámetros.
 
 $$
-F = \frac{\frac{PRE}{PA-PC}}{\frac{1-PRE}{n-PA}}
+F = \frac{\frac{\text{PRE}}{\text{PA}-\text{PC}}}{\frac{1-\text{PRE}}{n-\text{PA}}}
 $$
 
 En esta fórmula para convertir el PRE en el **estadístico de prueba** $F$, $PA$ se refiere a la cantidad de parámetros del modelo A, $PC$ representa la cantidad de parámetros del modelo C y $n$ indica el tamaño de la muestra.
 
 ```{r}
-PA <- 1  # media observada de salarios
-PC <- 0  # valor obtenido de tabla de salarios mínimos
-n <- 279 # egresados
+PA <- 1  # cantidad de parámetros del modelo Aumentado
+PC <- 0  # cantidad de parámetros del modelo compacto
+n <- 279 # cantidad de participantes
 
 Fstatistic <- (PRE/(PA - PC))/((1 - PRE)/(n - PA))
 ```

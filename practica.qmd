@@ -40,18 +40,6 @@ En el repositorio de donde se descargaron los datos, el archivo *variables.pdf* 
 
 ![](variableseading.png)
 
-Veamos algunos estadísticos descriptivos.
-
-```{r}
-
-```
-
-Ahora veamos algunos gráficos.
-
-```{r}
-
-```
-
 # Referencia
 
 Pasqualotto, A., Altarelli, I., De Angeli, A., Menestrina, Z., Bavelier, D., & Venuti, P. (2022). Enhancing reading skills through a video game mixing action mechanics and cognitive training. *Nature human behaviour*, 6(4), 545-554.
