@@ -104,6 +104,12 @@ $$
 F = \frac{\frac{\text{PRE}}{\text{PA}-\text{PC}}}{\frac{1-\text{PRE}}{n-\text{PA}}}
 $$
 
+Dos razones para calcular $F$:
+
+1.  Examinar la reducción proporcional del error por **parámetro adicional**.
+
+2.  Comparar la proporción de error que fue reducida (PRE) con la proporción de error restante **(1 - PRE)**.
+
 En esta fórmula para convertir el PRE en el **estadístico de prueba** $F$, $PA$ se refiere a la cantidad de parámetros del modelo A, $PC$ representa la cantidad de parámetros del modelo C y $n$ indica el tamaño de la muestra.
 
 ```{r}
@@ -124,7 +130,7 @@ En este punto necesitamos conocer la **distribución muestral** de $F$, es decir
 curve(df(x, PA - PC, n - PA), from=0, to=6)
 ```
 
-En una distribución $F$, `PA - PC` y `n - PA` se denominan **grados de libertad** y existe una distribución $F$ diferente para distintos grados de libertad. En una distribución $F$ con grados de libertad $PA - PC=1$ y $n - PA=278$, lo más probable es observar valores iguales o inferiores a 3.875126.
+En una distribución $F$, `PA - PC` y `n - PA` se denominan **grados de libertad** y existe una distribución $F$ diferente para distintos grados de libertad. En una distribución $F$ con grados de libertad $PA - PC=1$ (grados de libertad del numerador) y $n - PA=278$ (grados de libertad del denominador), lo más probable es observar valores iguales o inferiores a 3.875126.
 
 ```{r}
 pf(3.875126, PA - PC, n-PA)
@@ -144,3 +150,17 @@ pf(Fstatistic, PA - PC, n-PA, lower.tail = FALSE)
 ```
 
 Dado que la probabilidad de observar un valor de $F$ tan grande como `Fstatistic` es menor a 0.05, rechazamos la hipótesis (nula) de que el modelo A genere errores o residuos similares al modelo C. Esto equivale a rechazar el modelo C.
+
+La información para calcular $F$ se puede organizar en una tabla ANOVA.
+
+| Source            |     Sums of squares     | Degrees of freedom |        Mean squares         |         F         | probability |
+|:------------|:-----------------:|:--------:|:----------:|:--------:|:--------:|
+| Reduce, Model A   | $SSR = SSE(C) - SSE(A)$ |     $PA - PC$      |  $MSR = \frac{SSR}{PA-PC}$  | $\frac{MSR}{MSE}$ |             |
+| Error for Model A |        $SSE(A)$         |      $n - PA$      | $MSE = \frac{SSE(A)}{n-PA}$ |                   |             |
+| Total             |        $SSE(C)$         |      $n - PC$      |                             |                   |             |
+
+| Source            | Sums of squares | Degrees of freedom | Mean squares |    F     | probability |
+|:------------|:-----------------:|:--------:|:----------:|:--------:|:--------:|
+| Reduce, Model A   |       279       |         1          |     279      | 87.93877 |  p \< .001  |
+| Error for Model A |       882       |        278         |   3.172662   |          |             |
+| Total             |      1161       |        279         |              |          |             |
