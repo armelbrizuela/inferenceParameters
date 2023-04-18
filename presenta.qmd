@@ -45,17 +45,21 @@ egresados$P44 <- na_if(egresados$P44, 99)
 egresados <- drop_na(egresados, P44)
 ```
 
+```{r}
+summary(egresados$P44)
+```
+
 Vamos a trabajar con graduados cuyo título máximo sea bachillerato o licenciatura.
 
 ```{r}
 egresados <- filter(egresados, F_3 %in% c("1", "2"))
 ```
 
-![](salariosRangos.png)
-
 ```{r}
 hist(egresados$P44, main="", ylab="", xlab = "")
+
 axis(side = 1, at = seq(1, 10, 1), labels = seq(1, 10, 1))
+
 abline(v = mean(egresados$P44), col="blue", lwd=2)
 ```
 
@@ -74,11 +78,11 @@ Lo que quisiéramos es generalizar, es decir, hacer la **inferencia estadística
 En este escenario, nuestros modelos C(ompacto) y A(umentado) son los siguientes:
 
 $$
-\text{MODELO C: } Y_i = 3 + \varepsilon_i
+\text{MODELO C: } Y_i = B_0 + \varepsilon_i = 3 + \varepsilon_i
 $$
 
 $$
-\text{MODELO A: } Y_i = \beta_0 + \varepsilon_i
+\text{MODELO A: } Y_i = \beta_0 + \varepsilon_i = 4 + \varepsilon_i
 $$
 
 Ahora vamos a calcular los SSE (*Sum of Squared Errors*) de los modelos: `SSE_C` y `SSE_A`.
@@ -88,13 +92,28 @@ SSE_C <- sum((egresados$P44 - 3)^2)
 SSE_A <- sum((egresados$P44 - mean(egresados$P44))^2)
 ```
 
+En la página 46 del libro se introduce una nueva suma de cuadrados: la suma de cuadrados reducida. En inglés, el término se expresa como **Sum of Squares Reduced**y su abreviatura es **SSR**.
+
+Se puede calcular como la diferencia entre la suma de cuadrados del modelo compacto y la suma de cuadrados del modelo aumentado.
+
+```{r}
+SSR <- SSE_C - SSE_A
+SSR
+```
+
+También se puede calcular como la sumatoria de las diferencias al cuadrado entre los valores predichos por cada modelo.
+
+```{r}
+sum((rep(3, 279) - rep(4, 279))^2)
+```
+
 Tal y como se ha visto en clases anteriores, el modelo A genera menos error que el modelo C. Esto se ve más claramente cuando calculamos el PRE (*Proportional Reduction Error*).
 
 ```{r}
 PRE <- (SSE_C - SSE_A)/SSE_C
 ```
 
-Al utilizar el modelo A, logramos reducir el error en un 24%.
+Al utilizar el modelo A, logramos reducir el error en aproximadamente un 24%.
 
 Sin embargo, el modelo A al ser más complejo (tiene un parámetro adicional) necesariamente reduce el error. De hecho, si incluyéramos más parámetros en el modelo A, aún cuando no tengan ninguna relación con el salario, también veríamos que el error del modelo A sería menor que el del C.
 
@@ -118,19 +137,22 @@ PC <- 0  # cantidad de parámetros del modelo C(ompacto)
 n <- 279 # cantidad de participantes
 
 Fstatistic <- (PRE/(PA - PC))/((1 - PRE)/(n - PA))
+Fstatistic
 ```
 
 Si el modelo A es mejor que el modelo C, `Fstatistic` deberá ser un número mayor a 1. Si `Fstatistic` estuviera cercano a 1, entonces el error del modelo C sería muy similar al del modelo A, tomando en cuenta la cantidad extra de parámetros del modelo A.
 
-El valor de $F$ depende en parte del valor de PRE y a su vez el valor de PRE depende en parte de la media de los datos. Dado que los datos son solo una de infinitas muestras diferentes, tanto PRE como $F$ van a ser diferentes en cada muestreo.
+El valor de $F$ depende en parte del valor de PRE y a su vez el valor de PRE depende de los datos. Dado que los datos son solo una de infinitas muestras diferentes, tanto PRE como $F$ van a ser diferentes en cada muestreo.
 
-En este punto necesitamos conocer la **distribución muestral** de $F$, es decir, cuáles serían los valores de $F$ en otras muestras. Si asumimos que los errores que componen `SSE_C` y `SSE_A` son **normales**, **independientes**, **distribuidos idénticamente** y **no sesgados**, la distribución muestral de $F$ sigue una distribución $F$.
+En este punto necesitamos conocer la **distribución muestral** de $F$, es decir, cuáles serían los valores de $F$ en otras muestras.
+
+Si asumimos que los errores que producen `SSE_C` y `SSE_A` son **normales**, **independientes**, **distribuidos idénticamente** y **no sesgados**, la distribución muestral de $F$ sigue una distribución $F$.
 
 ```{r}
-curve(df(x, PA - PC, n - PA), from=0, to=6)
+curve(df(x, PA - PC, n - PA), from=0, to=4)
 ```
 
-En una distribución $F$, `PA - PC` y `n - PA` se denominan **grados de libertad** y existe una distribución $F$ diferente para distintos grados de libertad. En una distribución $F$ con grados de libertad $PA - PC=1$ (grados de libertad del numerador) y $n - PA=278$ (grados de libertad del denominador), lo más probable es observar valores iguales o inferiores a 3.875126.
+En una distribución $F$, `PA - PC` y `n - PA` se denominan **grados de libertad** y existe una distribución $F$ diferente para distintos grados de libertad. En una distribución $F$ con grados de libertad $PA - PC=1$ (grados de libertad del numerador) y $n - PA=278$ (grados de libertad del denominador), lo más probable (95%) es observar valores iguales o inferiores a 3.875126.
 
 ```{r}
 pf(3.875126, PA - PC, n-PA)
@@ -143,7 +165,7 @@ curve(df(x, PA - PC, n - PA), from=0, to=90)
 abline(v = Fstatistic, col="red", lwd=4)
 ```
 
-En el gráfico de la distribución muestral de $F$ se aprecia que es prácticamente imposible observar valores iguales o mayores que `Fstatistic`. De hecho, es posible calcular la probabilidad de observar un valor tan extremo como `Fstatistic` o superior.
+En el gráfico de la distribución muestral de $F$ se aprecia que es prácticamente imposible observar valores iguales o mayores que `Fstatistic` bajo el supuesto de la hipótesis (nula) de que ambos modelos generan el mismo error.
 
 ```{r}
 pf(Fstatistic, PA - PC, n-PA, lower.tail = FALSE)
@@ -154,13 +176,13 @@ Dado que la probabilidad de observar un valor de $F$ tan grande como `Fstatistic
 La información para calcular $F$ se puede organizar en una tabla ANOVA.
 
 | Source            |     Sums of squares     | Degrees of freedom |        Mean squares         |         F         | probability |
-|:------------|:-----------------:|:--------:|:----------:|:--------:|:--------:|
+|:-----------|:--------------------:|:----------:|:----------:|:----------:|:----------:|
 | Reduce, Model A   | $SSR = SSE(C) - SSE(A)$ |     $PA - PC$      |  $MSR = \frac{SSR}{PA-PC}$  | $\frac{MSR}{MSE}$ |             |
 | Error for Model A |        $SSE(A)$         |      $n - PA$      | $MSE = \frac{SSE(A)}{n-PA}$ |                   |             |
 | Total             |        $SSE(C)$         |      $n - PC$      |                             |                   |             |
 
 | Source            | Sums of squares | Degrees of freedom | Mean squares |    F     | probability |
-|:------------|:-----------------:|:--------:|:----------:|:--------:|:--------:|
+|:-----------|:----------:|:----------:|:----------:|:----------:|:----------:|
 | Reduce, Model A   |       279       |         1          |     279      | 87.93877 |  p \< .001  |
 | Error for Model A |       882       |        278         |   3.172662   |          |             |
 | Total             |      1161       |        279         |              |          |             |
