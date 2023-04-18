@@ -31,10 +31,10 @@ Con la función `library()`, active los paquetes **stringr**, **readxl**, **dply
 Lea el archivo de datos **reading.xlsx** con la función `read_excel()` y guarde los datos en un objeto denominado `reading`. Del archivo de Excel, solamente lea la hoja **1. reading skills**.
 
 ```{r}
-reading <- read_excel("reading.xlsx", sheet = "1. reading skills")
+reading <- read_excel( , sheet = "1. reading skills")
 ```
 
-Con la función `glimpse()` verifique que, excepto las columnas `ID` y `group`, todas las columnas sean númericas, específicamente de tipo `dbl` (`double`).
+Con la función `glimpse()` verifique que, excepto las columnas `ID`, `group` y `time`, todas las columnas sean númericas, específicamente de tipo `dbl` (`double`).
 
 ```{r}
 
@@ -53,22 +53,28 @@ Elimine el símbolo "-" de los valores contenidos en la columna `time`. Para
 reading$time <- str_remove( , )
 ```
 
-Es necesario reorganizar los datos para todas las observaciones de una misma persona participante aparezcan en una misma fila.
+Es necesario reorganizar los datos para que todas las observaciones de una misma persona aparezcan en una misma fila.
 
 ```{r}
-reading <- pivot_wider(reading, names_from = time, values_from = w_speed:text_accuracy)
+reading <- pivot_wider(
+  reading, 
+  names_from = time, 
+  values_from = w_speed:text_accuracy)
 ```
 
 Muestre la media, el valor mínimo y el valor máximo de las variables numéricas (`double`). También muestre cuántos valores `NA` hay en cada columna. Para ello, utilice la función `describirNumericas()`.
 
 ```{r}
 describirNumericas <- function(datos) {
+  
   df <- select(reading, where(is.numeric))
-  result <- tibble(
-    missing = apply(df, 2, function(x) sum(is.na(x))),
-    min = apply(df, 2, min, na.rm = TRUE),
-    mean = apply(df, 2, mean, na.rm = TRUE),
-    max = apply(df, 2, max, na.rm = TRUE))
+  
+  result <- data.frame(
+    missing = apply(df, 2, \(x) sum(is.na(x))),
+    min     = apply(df, 2, min, na.rm = TRUE),
+    mean    = apply(df, 2, mean, na.rm = TRUE),
+    max     = apply(df, 2, max, na.rm = TRUE))
+  
   result
 }
 ```
@@ -77,7 +83,7 @@ describirNumericas <- function(datos) {
 
 ```
 
-Muestre una tabla de frecuencias de las variables `factor`. También muestre cuántos valores `NA` hay en cada columna. Para ello, utilice la función `describirNoNumericas()`.
+Muestre una tabla de frecuencias de las variables no numéricas, es decir, las columnas `character` y `factor`. También muestre cuántos valores `NA` hay en cada columna. Para ello, utilice la función `describirNoNumericas()`.
 
 ```{r}
 describirNoNumericas <- function(datos) {
@@ -90,7 +96,7 @@ describirNoNumericas <- function(datos) {
 
 ```
 
-Con la función `lm()` estime un modelo C(ompacto) con los predictores `age`, `sex`, `IQ` y `w_accuracy_pretest` y un modelo A(umentado) con los mismos predictores más `group`. En ambos modelos, la variable de respuesta debe ser `w_accuracy_posttest`. Recuerde incluir el intercepto (1) en ambos modelos al inicio de la fórmula dentro de `lm()`.
+Con la función `lm()` estime un modelo C(ompacto) con los predictores `age`, `sex`, `IQ` y `w_accuracy_pretest` y un modelo A(umentado) con los mismos predictores más `group`. En ambos modelos, la variable de respuesta debe ser `w_accuracy_posttest`. Recuerde incluir el intercepto, el valor 1, al inicio de las fórmula dentro de `lm()`.
 
 ```{r}
 
@@ -107,11 +113,17 @@ F = \frac{\frac{\text{PRE}}{\text{PA}-\text{PC}}}{\frac{1-\text{PRE}}{n-\text{PA
 $$
 
 ```{r}
-
+SSE_C <- 
+SSE_A <- 
+PRE   <- 
 ```
 
 ```{r}
+PA <-   # cantidad de parámetros del modelo Aumentado
+PC <-   # cantidad de parámetros del modelo Compacto
+n  <-   # cantidad de participantes
 
+Fstatistic <- 
 ```
 
 Si el modelo A es significativamente mejor que el modelo C, entonces el valor de $F$ debe ser estadísticamente significativo. Si esto ocurre, podríamos concluir que la variable `group` reduce los residuos de manera significativa.
@@ -126,6 +138,12 @@ La función `anova()` permite obtener de una forma más simple tanto el valor de
 
 ```{r}
 anova(modeloC, modeloA)
+```
+
+Calcule la suma de cuadrados denominada **SSR** e identifíquele en el output de `anova()`.
+
+```{r}
+SSR <- 
 ```
 
 Grafique los residuos del modelo A para determinar si son (aproximadamente) normales.
