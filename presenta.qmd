@@ -92,7 +92,7 @@ SSE_C <- sum((egresados$P44 - 3)^2)
 SSE_A <- sum((egresados$P44 - mean(egresados$P44))^2)
 ```
 
-En la página 46 del libro se introduce una nueva suma de cuadrados: la suma de cuadrados reducida. En inglés, el término se expresa como **Sum of Squares Reduced**y su abreviatura es **SSR**.
+En la página 46 del libro se introduce una nueva suma de cuadrados: la suma de cuadrados reducida. En inglés, el término se expresa como **Sum of Squares Reduced** y su abreviatura es **SSR**.
 
 Se puede calcular como la diferencia entre la suma de cuadrados del modelo compacto y la suma de cuadrados del modelo aumentado.
 
@@ -155,7 +155,11 @@ curve(df(x, PA - PC, n - PA), from=0, to=4)
 En una distribución $F$, `PA - PC` y `n - PA` se denominan **grados de libertad** y existe una distribución $F$ diferente para distintos grados de libertad. En una distribución $F$ con grados de libertad $PA - PC=1$ (grados de libertad del numerador) y $n - PA=278$ (grados de libertad del denominador), lo más probable (95%) es observar valores iguales o inferiores a 3.875126.
 
 ```{r}
-pf(3.875126, PA - PC, n-PA)
+1-pf(3.875126, PA - PC, n-PA)
+```
+
+```{r}
+qf(0.95, PA-PC, n-PA)
 ```
 
 Esto implica que es muy probable observar valores de $F$ cercanos a aproximadamente 4. Si nuestro `Fstatistic` no supera este umbral de 3.875126, entonces no podemos rechazar la hipótesis (nula) de que el modelo A en futuros muestreos generará errores muy similares al modelo C.
@@ -176,13 +180,13 @@ Dado que la probabilidad de observar un valor de $F$ tan grande como `Fstatistic
 La información para calcular $F$ se puede organizar en una tabla ANOVA.
 
 | Source            |     Sums of squares     | Degrees of freedom |        Mean squares         |         F         | probability |
-|:-----------|:--------------------:|:----------:|:----------:|:----------:|:----------:|
+|:-----------|:---------------------------:|:----------:|:-------------------:|:----------:|:----------:|
 | Reduce, Model A   | $SSR = SSE(C) - SSE(A)$ |     $PA - PC$      |  $MSR = \frac{SSR}{PA-PC}$  | $\frac{MSR}{MSE}$ |             |
 | Error for Model A |        $SSE(A)$         |      $n - PA$      | $MSE = \frac{SSE(A)}{n-PA}$ |                   |             |
 | Total             |        $SSE(C)$         |      $n - PC$      |                             |                   |             |
 
 | Source            | Sums of squares | Degrees of freedom | Mean squares |    F     | probability |
-|:-----------|:----------:|:----------:|:----------:|:----------:|:----------:|
+|:-----------|:----------:|:----------:|:----------:|:----------:|:--------------:|
 | Reduce, Model A   |       279       |         1          |     279      | 87.93877 |  p \< .001  |
 | Error for Model A |       882       |        278         |   3.172662   |          |             |
 | Total             |      1161       |        279         |              |          |             |

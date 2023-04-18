@@ -25,32 +25,35 @@ install.packages("tidyr")
 Con la función `library()`, active los paquetes **stringr**, **readxl**, **dplyr** y **tidyr**.
 
 ```{r}
-
+library(stringr)
+library(readxl)
+library(dplyr)
+library(tidyr)
 ```
 
 Lea el archivo de datos **reading.xlsx** con la función `read_excel()` y guarde los datos en un objeto denominado `reading`. Del archivo de Excel, solamente lea la hoja **1. reading skills**.
 
 ```{r}
-reading <- read_excel( , sheet = "1. reading skills")
+reading <- read_excel("reading.xlsx" , sheet = "1. reading skills")
 ```
 
 Con la función `glimpse()` verifique que, excepto las columnas `ID`, `group` y `time`, todas las columnas sean númericas, específicamente de tipo `dbl` (`double`).
 
 ```{r}
-
+glimpse(reading)
 ```
 
 La columna `group` es de tipo `character` y `sex` es de tipo `double`. Modifique ambas para que sean de tipo `factor`.
 
 ```{r}
-reading$sex <- as.factor()
-reading$group <- as.factor()
+reading$sex <- as.factor(reading$sex)
+reading$group <- as.factor(reading$group)
 ```
 
 Elimine el símbolo "-" de los valores contenidos en la columna `time`. Para
 
 ```{r}
-reading$time <- str_remove( , )
+reading$time <- str_remove(reading$time, "-")
 ```
 
 Es necesario reorganizar los datos para que todas las observaciones de una misma persona aparezcan en una misma fila.
@@ -80,7 +83,7 @@ describirNumericas <- function(datos) {
 ```
 
 ```{r}
-
+describirNumericas(reading)
 ```
 
 Muestre una tabla de frecuencias de las variables no numéricas, es decir, las columnas `character` y `factor`. También muestre cuántos valores `NA` hay en cada columna. Para ello, utilice la función `describirNoNumericas()`.
@@ -93,13 +96,19 @@ describirNoNumericas <- function(datos) {
 ```
 
 ```{r}
-
+describirNoNumericas(reading)
 ```
 
-Con la función `lm()` estime un modelo C(ompacto) con los predictores `age`, `sex`, `IQ` y `w_accuracy_pretest` y un modelo A(umentado) con los mismos predictores más `group`. En ambos modelos, la variable de respuesta debe ser `w_accuracy_posttest`. Recuerde incluir el intercepto, el valor 1, al inicio de las fórmula dentro de `lm()`.
+Con la función `lm()` estime un modelo C(ompacto) con los predictores `age`, `sex`, `IQ` y `w_accuracy_pretest` y un modelo A(umentado) con los mismos predictores más `group`. En ambos modelos, la variable de respuesta debe ser `w_accuracy_posttest`. Recuerde incluir el intercepto, el valor 1, al inicio de las fórmulas dentro de `lm()`.
 
 ```{r}
+modeloC <- lm(
+  w_accuracy_posttest ~ 1 + age + sex + IQ + w_accuracy_pretest, 
+  data = reading)
 
+modeloA <- lm(
+  w_accuracy_posttest ~ 1 + age + sex + IQ + w_accuracy_pretest + group, 
+  data = reading)
 ```
 
 Calcule el valor de PRE y de la $F$.
@@ -113,17 +122,17 @@ F = \frac{\frac{\text{PRE}}{\text{PA}-\text{PC}}}{\frac{1-\text{PRE}}{n-\text{PA
 $$
 
 ```{r}
-SSE_C <- 
-SSE_A <- 
-PRE   <- 
+SSE_C <- sum(residuals(modeloC)^2)
+SSE_A <- sum(residuals(modeloA)^2)
+PRE   <- 1 - (SSE_A)/(SSE_C)
 ```
 
 ```{r}
-PA <-   # cantidad de parámetros del modelo Aumentado
-PC <-   # cantidad de parámetros del modelo Compacto
-n  <-   # cantidad de participantes
+PA <- 6 # cantidad de parámetros del modelo Aumentado
+PC <- 5 # cantidad de parámetros del modelo Compacto
+n  <- 151 # cantidad de participantes
 
-Fstatistic <- 
+Fstatistic <- (PRE/(PA-PC))/((1-PRE)/(n-PA))
 ```
 
 Si el modelo A es significativamente mejor que el modelo C, entonces el valor de $F$ debe ser estadísticamente significativo. Si esto ocurre, podríamos concluir que la variable `group` reduce los residuos de manera significativa.
@@ -131,7 +140,7 @@ Si el modelo A es significativamente mejor que el modelo C, entonces el valor de
 Con la función `pf()`, calcule la probabilidad de observar un valor igual o más grande que `Fstatistic`.
 
 ```{r}
-
+pf(Fstatistic, PA - PC, n - PA, lower.tail = FALSE)
 ```
 
 La función `anova()` permite obtener de una forma más simple tanto el valor de la $F$ como el de la probabilidad asociada a la prueba estadística.
@@ -140,16 +149,17 @@ La función `anova()` permite obtener de una forma más simple tanto el valor de
 anova(modeloC, modeloA)
 ```
 
-Calcule la suma de cuadrados denominada **SSR** e identifíquele en el output de `anova()`.
+Calcule la suma de cuadrados denominada **SSR** e identifíquela en el output de `anova()`.
 
 ```{r}
-SSR <- 
+SSR <- SSE_C - SSE_A
+SSR
 ```
 
 Grafique los residuos del modelo A para determinar si son (aproximadamente) normales.
 
 ```{r}
-
+hist(residuals(modeloA))
 ```
 
 # Referencia
